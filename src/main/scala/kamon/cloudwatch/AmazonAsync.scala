@@ -71,7 +71,7 @@ private[cloudwatch] object AmazonAsync {
       request: Req
   )(send: (Req, AsyncHandler[Req, Res]) => JFuture[Res]): Future[Unit] = {
 
-    val promise: Promise[Unit] = Promise[Unit]
+    val promise: Promise[Unit] = Promise[Unit]()
     val handler = new AsyncHandler[Req, Res] {
       override def onError(exception: Exception): Unit =
         promise.failure(exception)

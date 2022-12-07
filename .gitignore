@@ -1,3 +1,7 @@
+# Compiled envs   #
+###################
+.env.sh
+
 # Compiled source #
 ###################
 *.com
@@ -43,6 +47,7 @@ Thumbs.db
 *.iml
 *.ipr
 *.iws
+.bsp
 
 # Eclipse config files #
 ########################

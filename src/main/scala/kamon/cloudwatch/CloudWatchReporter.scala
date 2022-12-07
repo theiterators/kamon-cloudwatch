@@ -1,6 +1,5 @@
 package kamon.cloudwatch
 
-import java.time.Clock
 import java.util.concurrent.atomic.AtomicReference
 
 import com.typesafe.config.Config
@@ -26,12 +25,10 @@ final class CloudWatchModuleFactory extends ModuleFactory {
   }
 }
 
-final class CloudWatchReporter private[cloudwatch] (cfg: Configuration, clock: Clock)
+final class CloudWatchReporter private[cloudwatch] (cfg: Configuration)
     extends MetricReporter {
 
   private[this] val logger = LoggerFactory.getLogger(classOf[MetricsShipper].getPackage.getName)
-
-  def this(cfg: Configuration) = this(cfg, Clock.systemUTC())
 
   private[this] val configuration: AtomicReference[Configuration] =
     new AtomicReference(cfg)

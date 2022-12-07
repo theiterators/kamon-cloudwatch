@@ -1,7 +1,5 @@
 package kamon.cloudwatch
 
-import java.time.{Clock, Instant, ZoneOffset}
-
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.{givenThat => _, _}
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -18,8 +16,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 object CloudWatchReporterSpec {
-  final val TestClock: Clock = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC)
-
   final val TestConfig = ConfigFactory.parseString(
     """kamon.cloudwatch {
       |  namespace = kamon-cloudwatch-test
@@ -29,6 +25,7 @@ object CloudWatchReporterSpec {
   )
 }
 
+//todo that test required AWS_ACCESS_KEY_ID=fake and AWS_SECRET_ACCESS_KEY=fake to be set
 class CloudWatchReporterSpec extends AnyFlatSpec with Matchers {
   import CloudWatchReporterSpec._
 
@@ -38,6 +35,7 @@ class CloudWatchReporterSpec extends AnyFlatSpec with Matchers {
     val fixture = new Fixture(config)
     try {
       testCode(fixture.cloudWatch, fixture.reporter)
+      ()
     } finally {
       fixture.reporter.stop()
       fixture.cloudWatch.stop()
@@ -88,7 +86,7 @@ class CloudWatchReporterSpec extends AnyFlatSpec with Matchers {
       )
 
       val testConfig = Configuration.fromConfig(endpoint.withFallback(config))
-      new CloudWatchReporter(testConfig, TestClock)
+      new CloudWatchReporter(testConfig)
     }
 
   }

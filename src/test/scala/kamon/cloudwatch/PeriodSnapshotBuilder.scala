@@ -1,11 +1,8 @@
 package kamon.cloudwatch
 
-import java.time.{Duration, Instant}
+import java.time.Instant
 
-import kamon.Kamon
 import kamon.metric._
-import kamon.tag.TagSet
-import kamon.testkit.MetricInspection
 
 class PeriodSnapshotBuilder {
 
@@ -14,7 +11,7 @@ class PeriodSnapshotBuilder {
   private var _counters: Vector[MetricSnapshot.Values[Long]]    = Vector.empty
   private var _gauges: Vector[MetricSnapshot.Values[Double]]    = Vector.empty
   private var _histograms: Vector[MetricSnapshot.Distributions] = Vector.empty
-  private var _timers: Vector[MetricSnapshot.Distributions]     = Vector.empty
+  private val _timers: Vector[MetricSnapshot.Distributions]     = Vector.empty
   private var _rangeSamplers: Vector[MetricSnapshot.Distributions] =
     Vector.empty
 

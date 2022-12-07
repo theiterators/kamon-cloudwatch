@@ -1,3 +1,5 @@
-addSbtPlugin("com.github.sbt"  % "sbt-ci-release" % "1.5.9")
-addSbtPlugin("com.dwijnand"  % "sbt-travisci"   % "1.2.0")
-addSbtPlugin("org.scalameta" % "sbt-scalafmt"   % "2.4.5")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt"   % "2.5.0")
+
+addSbtPlugin("com.timushev.sbt" % "sbt-rewarn" % "0.1.3")
+
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.4")
