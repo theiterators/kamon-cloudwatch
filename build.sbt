@@ -30,7 +30,7 @@ scmInfo := Some(
 scalaVersion := "2.13.10"
 
 scalacOptions ++= Seq(
-  "-release:17",
+//  "-release:17",
   "-Ymacro-annotations",
   "-Ywarn-macros:after",
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
