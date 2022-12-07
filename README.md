@@ -33,34 +33,24 @@ The module will be loaded automatically and you should see "_Starting the Kamon 
 You can configure the module behaviour by overriding any of the following settings in your `application.conf` file:
 
 ```
-kamon {
-  cloudwatch {
+kamon.cloudwatch {
+  # namespace is the AWS Metrics custom namespace
+  namespace = kamon-cloudwatch
 
-    # namespace is the AWS Metrics custom namespace
-    namespace = <application name>
-    
-    # (Optional) AWS region, on ec2 region is fetched by getCurrentRegion command
-    region = eu-west-1
+  # batch size of data when send to Cloudwatch
+  batch-size = 20
 
-    # batch size of data when send to Cloudwatch. Default: 20
-    batch-size = 20
+  # Executor context threads.
+  execution-context-threads = 4
 
-    # how many threads will be assigned to the pool that does the shipment of metrics. Default: 5
-    async-threads = 5
-    
-    # whether to add Kamon environment tags to each of the metrics. Default: false
-    include-environment-tags = false
+  # You can override cloudwatch endpoint. Useful for testing against localstack
+  # cloudwatch-endpoint-override = ""
 
-    # explicit aws access key and secret definition (optional)
-    # if not specified values fetched from one of the followings
-    #   * AWS_PROFILE env variable
-    #   * AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env variables
-    #   * Amazon EC2 Instance Metadata
-    # access-key-id = ""
-    # secret-access-key = ""
-
-  }
+  # Whether to include Kamon environmental tag to cloudwatch metrics. Default is false
+  # include-environment-tags = false
 }
+
+kamon.modules.cloudwatch.enabled = true
 ```
 
 
