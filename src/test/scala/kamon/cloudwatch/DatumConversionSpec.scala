@@ -2,17 +2,14 @@ package kamon.cloudwatch
 
 import java.time.Instant
 import java.util.Date
-
-import com.amazonaws.services.cloudwatch.model.{Dimension, StandardUnit}
-
 import kamon.metric.MeasurementUnit
 import kamon.tag.TagSet
 import kamon.testkit.MetricSnapshotBuilder
 
-
 import scala.jdk.CollectionConverters._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.cloudwatch.model.{Dimension, StandardUnit}
 
 class DatumConversionSpec extends AnyFlatSpec with Matchers {
 
@@ -36,7 +33,7 @@ class DatumConversionSpec extends AnyFlatSpec with Matchers {
 
     val convertedDatums = datums(snapshot, TagSet.Empty)
     convertedDatums.size shouldBe 1
-    convertedDatums(0).getTimestamp shouldBe Date.from(givenInstant)
+    convertedDatums(0).timestamp() shouldBe Date.from(givenInstant).toInstant
   }
 
   it must "populate percentages" in {
@@ -49,7 +46,7 @@ class DatumConversionSpec extends AnyFlatSpec with Matchers {
 
     val convertedDatums = datums(snapshot, TagSet.Empty)
     convertedDatums.size shouldBe 1
-    convertedDatums(0).getUnit shouldBe StandardUnit.Percent.toString
+    convertedDatums(0).unit shouldBe StandardUnit.PERCENT
   }
 
   it must "attach user tags" in {
@@ -61,12 +58,12 @@ class DatumConversionSpec extends AnyFlatSpec with Matchers {
       .build()
 
     val expectedDimensions = List(
-      new Dimension().withName("tag").withValue("tagValue")
+      Dimension.builder().name("tag").value("tagValue").build()
     )
 
     val convertedDatums = datums(snapshot, TagSet.Empty)
     val dimensions =
-      convertedDatums.map(_.getDimensions.asScala).reduceRight(_ ++ _).toList
+      convertedDatums.map(_.dimensions().asScala).reduceRight(_ ++ _).toList
 
     dimensions shouldBe expectedDimensions
   }
@@ -77,12 +74,12 @@ class DatumConversionSpec extends AnyFlatSpec with Matchers {
       .build()
 
     val expectedDimensions = List(
-      new Dimension().withName("quxx").withValue("bar")
+      Dimension.builder().name("quxx").value("bar").build()
     )
 
     val convertedDatums = datums(snapshot, TagSet.from(Map("quxx" -> "bar")))
     val dimensions =
-      convertedDatums.map(_.getDimensions.asScala).reduceRight(_ ++ _).toList
+      convertedDatums.map(_.dimensions().asScala).reduceRight(_ ++ _).toList
 
     dimensions shouldBe expectedDimensions
   }

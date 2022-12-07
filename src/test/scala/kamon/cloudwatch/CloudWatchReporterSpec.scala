@@ -20,12 +20,12 @@ object CloudWatchReporterSpec {
     """kamon.cloudwatch {
       |  namespace = kamon-cloudwatch-test
       |  batch-size = 20
-      |  async-threads = 5
+      |  execution-context-threads = 5
       |}""".stripMargin
   )
 }
 
-//todo that test required AWS_ACCESS_KEY_ID=fake and AWS_SECRET_ACCESS_KEY=fake to be set
+//todo that test required AWS_ACCESS_KEY_ID=fake and AWS_SECRET_ACCESS_KEY=fake and AWS_REGION=fake to be set
 class CloudWatchReporterSpec extends AnyFlatSpec with Matchers {
   import CloudWatchReporterSpec._
 
@@ -80,8 +80,7 @@ class CloudWatchReporterSpec extends AnyFlatSpec with Matchers {
     val reporter: CloudWatchReporter = {
       val endpoint = ConfigFactory.parseMap(
         Map(
-          "kamon.cloudwatch.service-endpoint" -> s"http://localhost:${cloudWatch.port()}",
-          "kamon.cloudwatch.region"           -> "us-west-1"
+          "kamon.cloudwatch.cloudwatch-endpoint-override" -> s"http://localhost:${cloudWatch.port()}",
         ).asJava
       )
 

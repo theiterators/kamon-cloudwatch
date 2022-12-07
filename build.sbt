@@ -75,20 +75,19 @@ resolvers += Resolver.bintrayRepo("kamon-io", "releases")
 
 libraryDependencies ++= {
   object Versions {
-    val aws       = "1.12.129"
-    val log4j     = "2.19.0"
-    val kamon     = "2.5.11"
-    val scalatest = "3.2.14"
-    val slf4j     = "2.0.5"
-    val wiremock  = "2.25.1"
+    val awsCloudwatch = "2.18.28"
+    val log4j         = "2.19.0"
+    val kamon         = "2.5.11"
+    val scalatest     = "3.2.14"
+    val slf4j         = "2.0.5"
+    val wiremock      = "2.25.1"
   }
-
 
   Seq(
     "io.kamon"                 %% "kamon-core"             % Versions.kamon,
     "io.kamon"                 %% "kamon-testkit"          % Versions.kamon % Test,
     "org.slf4j"                % "slf4j-api"               % Versions.slf4j,
-    "com.amazonaws"            % "aws-java-sdk-cloudwatch" % Versions.aws,
+    "software.amazon.awssdk"   % "cloudwatch"              % Versions.awsCloudwatch,
     "org.scalatest"            %% "scalatest"              % Versions.scalatest % Test,
     "com.github.tomakehurst"   % "wiremock"                % Versions.wiremock % Test,
     "org.apache.logging.log4j" % "log4j-core"              % Versions.log4j % Test,

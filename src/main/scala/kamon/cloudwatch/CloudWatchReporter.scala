@@ -1,19 +1,16 @@
 package kamon.cloudwatch
 
-import java.util.concurrent.atomic.AtomicReference
-
 import com.typesafe.config.Config
-
 import kamon.Kamon
-import kamon.module.{ModuleFactory, MetricReporter}
 import kamon.metric.PeriodSnapshot
+import kamon.module.{MetricReporter, ModuleFactory}
 import kamon.tag.TagSet
-
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.util.{Success, Failure}
+import java.util.concurrent.{ExecutorService, Executors}
+import java.util.concurrent.atomic.AtomicReference
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 final class CloudWatchModuleFactory extends ModuleFactory {
   private[this] val logger = LoggerFactory.getLogger(classOf[MetricsShipper].getPackage.getName)
@@ -34,6 +31,9 @@ final class CloudWatchReporter private[cloudwatch] (cfg: Configuration)
     new AtomicReference(cfg)
 
   private[this] val shipper: MetricsShipper = new MetricsShipper(cfg)
+
+  private[this] val executorService: ExecutorService = Executors.newFixedThreadPool(cfg.executionContextThreads)
+  private[this] implicit val executionContext = ExecutionContext.fromExecutor(executorService)
 
   override def stop(): Unit = {
     logger.info("Shutting down the Kamon CloudWatch reporter.")
@@ -57,7 +57,7 @@ final class CloudWatchReporter private[cloudwatch] (cfg: Configuration)
       CloudWatchReporter.environmentTags(config)
     ).grouped(config.batchSize)
 
-    Future.traverse(metrics)(shipper.shipMetrics(config.nameSpace, _)).onComplete {
+    Future.traverse(metrics)(shipper.shipMetrics).onComplete {
       case Success(_) =>
         logger.debug("Metrics shipment has completed successfully.")
 

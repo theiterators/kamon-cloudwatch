@@ -1,72 +1,71 @@
 package kamon
 
-import java.util.Date
-
-import com.amazonaws.services.cloudwatch.model.{Dimension, MetricDatum, StandardUnit, StatisticSet}
-
-import kamon.metric.{Distribution, MeasurementUnit, Metric, MetricSnapshot, PeriodSnapshot}
+import kamon.metric.{Metric, _}
 import kamon.tag.{Tag, TagSet}
+import software.amazon.awssdk.services.cloudwatch.model._
 
+import java.util
+import java.util.Date
 import scala.jdk.CollectionConverters._
 
 package object cloudwatch {
-
-  type MetricDatumBatch = Vector[MetricDatum]
 
   /**
     * Produce the datums.
     * Code is taken from:
     * https://github.com/philwill-nap/Kamon/blob/master/kamon-cloudwatch/src/main/scala/kamon/cloudwatch/CloudWatchMetricsSender.scala
+    * and adjust ;)
     */
-  private[cloudwatch] def datums(snapshot: PeriodSnapshot, baseTags: TagSet): MetricDatumBatch = {
+  private[cloudwatch] def datums(snapshot: PeriodSnapshot, baseTags: TagSet): Vector[MetricDatum] = {
     def unitAndScale(unit: MeasurementUnit): (StandardUnit, Double) = {
       import MeasurementUnit.Dimension._
       import MeasurementUnit.{information, time}
 
       unit.dimension match {
-        case Percentage => StandardUnit.Percent -> 1.0
+        case Percentage => StandardUnit.PERCENT -> 1.0
 
         case Time if unit.magnitude == time.seconds.magnitude =>
-          StandardUnit.Seconds -> 1.0
+          StandardUnit.SECONDS -> 1.0
         case Time if unit.magnitude == time.milliseconds.magnitude =>
-          StandardUnit.Milliseconds -> 1.0
+          StandardUnit.MILLISECONDS -> 1.0
         case Time if unit.magnitude == time.microseconds.magnitude =>
-          StandardUnit.Microseconds -> 1.0
+          StandardUnit.MICROSECONDS -> 1.0
         case Time if unit.magnitude == time.nanoseconds.magnitude =>
-          StandardUnit.Microseconds -> 1E-3
+          StandardUnit.MICROSECONDS -> 1E-3
 
         case Information if unit.magnitude == information.bytes.magnitude =>
-          StandardUnit.Bytes -> 1.0
+          StandardUnit.BYTES -> 1.0
         case Information if unit.magnitude == information.kilobytes.magnitude =>
-          StandardUnit.Kilobytes -> 1.0
+          StandardUnit.KILOBYTES -> 1.0
         case Information if unit.magnitude == information.megabytes.magnitude =>
-          StandardUnit.Megabytes -> 1.0
+          StandardUnit.MEGABYTES -> 1.0
         case Information if unit.magnitude == information.gigabytes.magnitude =>
-          StandardUnit.Gigabytes -> 1.0
+          StandardUnit.GIGABYTES -> 1.0
 
-        case _ => StandardUnit.Count -> 1.0
+        case _ => StandardUnit.COUNT -> 1.0
       }
     }
 
     def datum(name: String, tags: TagSet, unit: StandardUnit): MetricDatum = {
-      val dimensions: List[Dimension] =
+      val dimensions: util.Collection[Dimension] =
         (baseTags withTags tags)
           .iterator()
           .map { tag =>
-            new Dimension()
-              .withName(tag.key)
-              .withValue(Tag.unwrapValue(tag).toString)
+            Dimension
+              .builder()
+              .name(tag.key)
+              .value(Tag.unwrapValue(tag).toString)
+              .build()
           }
-          .toList
+          .toList.asJavaCollection
 
-      val baseDatum = new MetricDatum()
-        .withMetricName(name)
-        .withTimestamp(Date.from(snapshot.to))
-        .withUnit(unit)
-
-      if (dimensions.nonEmpty) {
-        baseDatum.withDimensions(dimensions.asJava)
-      } else baseDatum
+      MetricDatum
+        .builder()
+        .metricName(name)
+        .timestamp(Date.from(snapshot.to).toInstant)
+        .unit(unit)
+        .dimensions(dimensions)
+        .build()
     }
 
     def datumFromDistribution(
@@ -74,13 +73,18 @@ package object cloudwatch {
     ): Seq[MetricDatum] = {
       val (unit, scale) = unitAndScale(distSnap.settings.unit)
       distSnap.instruments.filter(_.value.count > 0).map { snap =>
-        val statSet = new StatisticSet()
-          .withMaximum(snap.value.max.toDouble * scale)
-          .withMinimum(snap.value.min.toDouble * scale)
-          .withSampleCount(snap.value.count.toDouble)
-          .withSum(snap.value.sum.toDouble * scale)
+        val statisticSet = StatisticSet
+          .builder()
+          .maximum(snap.value.max.toDouble * scale)
+          .minimum(snap.value.min.toDouble * scale)
+          .sampleCount(snap.value.count.toDouble)
+          .sum(snap.value.sum.toDouble * scale)
+          .build()
 
-        datum(distSnap.name, snap.tags, unit).withStatisticValues(statSet)
+        datum(distSnap.name, snap.tags, unit)
+          .toBuilder
+          .statisticValues(statisticSet)
+          .build()
       }
     }
 
@@ -91,7 +95,9 @@ package object cloudwatch {
 
       valueSnap.instruments.map { snap =>
         datum(valueSnap.name, snap.tags, unit)
-          .withValue(T.toDouble(snap.value) * scale)
+          .toBuilder
+          .value(T.toDouble(snap.value) * scale)
+          .build()
       }
     }
 
