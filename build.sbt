@@ -26,7 +26,7 @@ scmInfo := Some(
     "scm:git:git@github.com:theiterators/kamon-cloudwatch.git"
   )
 )
-
+sonatypeCredentialHost := "oss.sonatype.org"
 scalaVersion := "2.13.10"
 
 scalacOptions ++= Seq(
