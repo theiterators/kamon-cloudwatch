@@ -20,6 +20,14 @@ organization := "pl.iterators"
 organizationName := "Iterators"
 homepage := Some(url("https://github.com/theiterators/kamon-cloudwatch"))
 
+developers := List(
+    Developer(
+      id = "kpalcowski",
+      name = "Krzysztof Palcowski",
+      email = "kpalcowski@iteratorshq.com",
+      url = url("https://github.com/kristerr")
+    )
+  )
 scmInfo := Some(
   ScmInfo(
     url("https://github.com/theiterators/kamon-cloudwatch"),
